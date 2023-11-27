@@ -2,18 +2,17 @@
     "input": {
         "debug": true,
         "upload_url": "https://naivelabs-tmp.s3.us-west-1.amazonaws.com/2.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=AKIAVS3UGYJ4VVPOZ2X5%2F20231126%2Fus-west-1%2Fs3%2Faws4_request&X-Amz-Date=20231126T055845Z&X-Amz-Expires=3600&X-Amz-Signature=575ac426bc9d524a4926e3ac84d5c9abef00c21763d23b2b25d1469c901855a1&X-Amz-SignedHeaders=host&x-id=PutObject",
-        "prompt": "a beautiful young lady, cinematic, dynamic lighting, 4k, hdr, ultra realistic",
-        "negative_prompt": "cartoon, animi",
+        "prompt": "a photo of A scene picturesque countryside adorned with blooming wildflowers, cinematic, dynamic lighting, 4k, hdr, ultra realistic",
+        "negative_prompt": "person, people, cartoon, animi, outfits, clothing, clutter, distracting elements",
 
-        "width": 800,
-        "height": 340,
+        "num_inference_steps": 50,
+        "guidance_scale": 7,
 
-        "num_inference_steps": 30,
-        "guidance_scale": 13,
-
-        "seed": 123,
         "upscale": 2.5,
-        "strength": 0.5
+        "strength": 1,
+
+        "input_url": "https://naivelabs-tmp.s3.us-west-1.amazonaws.com/remove.png",
+        "mask_url": "./mask.png"
     },
     "webhook": "http://localhost:3000/api/runpod-webhook"
 }

@@ -4,4 +4,5 @@ pip install runpod \
     diffusers \
     transformers \
     accelerate \
-    omegaconf
+    omegaconf \
+    transparent-background

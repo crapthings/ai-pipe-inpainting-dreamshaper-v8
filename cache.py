@@ -1,11 +1,14 @@
 import torch
+from transparent_background import Remover
 from diffusers import StableDiffusionPipeline
 
 from config import model_name
 
 print('cache model')
 
-pipe = StableDiffusionPipeline.from_single_file(
+remover = Remover()
+
+StableDiffusionPipeline.from_single_file(
   model_name,
   torch_dtype = torch.float16,
   variant = 'fp16',

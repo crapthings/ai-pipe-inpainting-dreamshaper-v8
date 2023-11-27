@@ -1,6 +1,7 @@
 import requests
 from io import BytesIO
 from urllib.parse import urlparse
+from PIL import Image
 
 def buff_png (image):
     buff = BytesIO()
@@ -27,3 +28,24 @@ def rounded_size (width, height):
         rounded_height += 8
 
     return int(rounded_width), int(rounded_height)
+
+def zoom_and_crop (image, zoom_factor):
+    new_width = int(image.width * zoom_factor)
+    new_height = int(image.height * zoom_factor)
+
+    image = image.resize((new_width, new_height))
+
+    left = (new_width - image.width) // 2
+    top = (new_height - image.height) // 2
+    right = left + image.width
+    bottom = top + image.height
+
+    image = image.crop((left, top, right, bottom))
+
+    return image
+
+def open_url (url):
+    response = requests.get(url)
+    image_data = BytesIO(response.content)
+    output_image = Image.open(image_data)
+    return output_image
