@@ -49,3 +49,11 @@ def open_url (url):
     image_data = BytesIO(response.content)
     output_image = Image.open(image_data)
     return output_image
+
+def resize_image (original_image, new_width):
+    aspect_ratio = float(new_width) / original_image.size[0]
+    new_height = int(aspect_ratio * original_image.size[1])
+    resized_image = original_image.resize((new_width, new_height), Image.Resampling.LANCZOS)
+    return resized_image
+
+def sc(self, clip_input, images): return images, [False for i in images]

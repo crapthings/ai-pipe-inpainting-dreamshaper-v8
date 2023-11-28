@@ -2,14 +2,13 @@ import math
 import requests
 
 import numpy as np
+from PIL import Image, ImageOps
 import torch
 from diffusers.utils import load_image
-from PIL import Image, ImageOps
 import runpod
 
-from utils import extract_origin_pathname, upload_image, rounded_size, zoom_and_crop, open_image
-# from inpainting import inpainting, img2img
-from inpainting import inpainting
+from utils import extract_origin_pathname, upload_image, rounded_size, open_url, resize_image
+from inpainting import inpainting, compel
 
 def run (job, _generator = None):
     # prepare task
@@ -20,47 +19,46 @@ def run (job, _generator = None):
 
         debug = _input.get('debug')
         upload_url = _input.get('upload_url')
+
         input_url = _input.get('input_url')
         mask_url = _input.get('mask_url')
 
         prompt = _input.get('prompt', 'a dog')
         negative_prompt = _input.get('negative_prompt', '')
-        # width = int(np.clip(_input.get('width', 768), 256, 1024))
-        # height = int(np.clip(_input.get('height', 768), 256, 1024))
         num_inference_steps = int(np.clip(_input.get('num_inference_steps', 30), 20, 150))
         guidance_scale = float(np.clip(_input.get('guidance_scale', 13.0), 0, 30))
+        strength = _input.get('strength', 1)
         seed = _input.get('seed')
-        upscale = _input.get('upscale')
-        strength = _input.get('strength')
+        invert = _input.get('invert')
+        fix = _input.get('fix')
+
+        limit = _input.get('limit', 768)
 
         if strength is not None:
             strength = float(np.clip(strength, 0, 1))
 
-        if upscale is not None:
-            upscale = float(np.clip(upscale, 1, 4))
-
-        # input_image = load_image(input_url).convert('RGBA')
-        input_image = open_image(input_url)
+        input_image = open_url(input_url)
         mask_image = load_image(mask_url)
 
-        limit = 960
-        input_image.thumbnail([limit, limit])
-        mask_image.thumbnail([limit, limit])
+        input_image = resize_image(input_image, limit)
+        mask_image = resize_image(mask_image, limit)
 
-        mask_image = ImageOps.invert(mask_image)
-
-        mask_image = zoom_and_crop(mask_image, 1.1)
+        if invert is True:
+            mask_image = ImageOps.invert(mask_image)
 
         renderWidth, renderHeight = rounded_size(input_image.width, input_image.height)
 
         if seed is not None:
             _generator = torch.Generator(device = 'cuda').manual_seed(seed)
 
+        prompt_embeds = compel.build_conditioning_tensor(prompt)
+        negative_prompt_embeds = compel.build_conditioning_tensor(negative_prompt)
+
         output_image = inpainting(
             image = input_image.convert('RGB'),
             mask_image = mask_image,
-            prompt = prompt,
-            negative_prompt = negative_prompt,
+            prompt_embeds = prompt_embeds,
+            negative_prompt_embeds = negative_prompt_embeds,
             width = renderWidth,
             height = renderHeight,
             num_inference_steps = num_inference_steps,
@@ -69,23 +67,17 @@ def run (job, _generator = None):
             generator = _generator
         ).images[0]
 
-        output_image = output_image.resize(input_image.size).convert('RGBA')
+        output_image = output_image.resize(input_image.size)
 
-        # if upscale is not None:
-        #     output_image = output_image.resize([int(input_image.width * upscale), int(input_image.height * upscale)])
-
-        # if strength is not None:
-        #     output_image = img2img(
-        #         image = output_image,
-        #         prompt = prompt,
-        #         negative_prompt = negative_prompt,
-        #         num_inference_steps = math.ceil(num_inference_steps / strength),
-        #         guidance_scale = guidance_scale,
-        #         strength = .18,
-        #         generator = _generator
-        #     ).images[0]
-
-        output_image.paste(input_image.convert('RGBA'), (0, 0), input_image.convert('RGBA'))
+        if fix is not True:
+            #
+            mask_image_arr = np.array(mask_image.convert('L'))
+            mask_image_arr = mask_image_arr[:, :, None]
+            mask_image_arr = mask_image_arr.astype(np.float32) / 255.0
+            mask_image_arr[mask_image_arr < 0.5] = 0
+            mask_image_arr[mask_image_arr >= 0.5] = 1
+            unmasked_unchanged_image_arr = (1 - mask_image_arr) * input_image + mask_image_arr * output_image
+            output_image = Image.fromarray(unmasked_unchanged_image_arr.round().astype('uint8'))
 
         # # output
         output_url = extract_origin_pathname(upload_url)
