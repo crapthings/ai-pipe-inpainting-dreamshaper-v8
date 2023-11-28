@@ -5,5 +5,4 @@ pip install runpod \
     transformers \
     accelerate \
     omegaconf \
-    transparent-background \
     compel

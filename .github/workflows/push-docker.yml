@@ -10,6 +10,6 @@ jobs:
     - name: Publish to Registry
       uses: elgohr/Publish-Docker-Github-Action@v5
       with:
-        name: crapthings/ai-pipe-txt2img-dreamshaper-v8
+        name: crapthings/ai-pipe-inpainting-dreamshaper-v8
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_PASSWORD }}

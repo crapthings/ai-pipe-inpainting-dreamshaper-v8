@@ -14,7 +14,6 @@ COPY *.py .
 RUN apt update && apt install curl -y
 RUN chmod +x ./scripts/install.sh
 RUN ./scripts/install.sh
-RUN curl -JLOf --max-time 0 https://civitai.com/api/download/models/128713
 RUN curl -JLOf --max-time 0 https://civitai.com/api/download/models/131004
 
 RUN rm -rf ./scripts

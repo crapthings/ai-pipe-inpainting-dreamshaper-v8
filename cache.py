@@ -1,12 +1,9 @@
 import torch
-from transparent_background import Remover
 from diffusers import StableDiffusionPipeline
 
 from config import model_name
 
 print('cache model')
-
-remover = Remover()
 
 StableDiffusionPipeline.from_single_file(
   model_name,
