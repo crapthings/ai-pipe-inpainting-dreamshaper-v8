@@ -15,7 +15,9 @@ RUN apt update && apt install curl -y
 RUN chmod +x ./scripts/install.sh
 RUN ./scripts/install.sh
 RUN curl -JLOf --max-time 0 https://civitai.com/api/download/models/131004
+RUN python cache.py
 
 RUN rm -rf ./scripts
+RUN rm cache.py
 
 CMD python -u ./runpod_app.py
