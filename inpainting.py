@@ -18,6 +18,8 @@ inpaintingPipe = StableDiffusionInpaintPipeline.from_single_file(
 
 inpaintingPipe.scheduler = EulerAncestralDiscreteScheduler.from_config(inpaintingPipe.scheduler.config)
 
+inpaintingPipe.enable_freeu(s1 = 0.9, s2 = 0.2, b1 = 1.2, b2 = 1.4)
+
 inpaintingPipe.to('cuda')
 # inpaintingPipe.enable_model_cpu_offload()
 
